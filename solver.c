@@ -63,11 +63,6 @@ int main() {
     double** u_star = (double**)calloc(ny, sizeof(double*));
     double** v_star = (double**)calloc(ny, sizeof(double*));
 
-    double** du_s = (double**)calloc(ny, sizeof(double*));
-    double** dv_s = (double**)calloc(ny, sizeof(double*));
-    double** du_ss = (double**)calloc(ny, sizeof(double*));
-    double** dv_ss = (double**)calloc(ny, sizeof(double*));
-
     double** Hx_old = (double**)calloc(ny, sizeof(double*));
     double** Hy_old = (double**)calloc(ny, sizeof(double*));
 
@@ -78,17 +73,20 @@ int main() {
     double** step1_mat_y = (double**)calloc(ny, sizeof(double*));
 
 
+    double* du_s = (double*)calloc(nx*ny, sizeof(double));
+    double* dv_s = (double*)calloc(nx*ny, sizeof(double));
+    double* du_ss = (double*)calloc(nx*ny, sizeof(double));
+    double* dv_ss = (double*)calloc(nx*ny, sizeof(double));
+
+    double* step1_mat_x_vec = (double*)calloc(nx*ny, sizeof(double));
+    double* step1_mat_y_vec = (double*)calloc(nx*ny, sizeof(double));
+
 
     for (i = 0; i < ny; i++) {
         u[i] = (double*)calloc(nx, sizeof(double));
         v[i] = (double*)calloc(nx, sizeof(double));
         u_star[i] = (double*)calloc(nx, sizeof(double));
         v_star[i] = (double*)calloc(nx, sizeof(double));
-        
-        du_s[i] = (double*)calloc(nx, sizeof(double));
-        dv_s[i] = (double*)calloc(nx, sizeof(double));
-        du_ss[i] = (double*)calloc(nx, sizeof(double));
-        dv_ss[i] = (double*)calloc(nx, sizeof(double));
 
         Hx_old[i] = (double*)calloc(nx, sizeof(double));
         Hy_old[i] = (double*)calloc(nx, sizeof(double));
@@ -263,12 +261,24 @@ int main() {
         }
     }
 
+    //deal with corner points for step1_mat_x and step1_mat_y
 
+
+    //vectorize step1_mat_x and step1_mat_y
+
+
+    //tridiagonal solve for du_ss and dv_ss
+
+
+    //tridiagonal solve for du_s and dv_s
+
+
+    //solve for u_star
 
 
 
     /* -------------------------------------------------------------------------
-    ----------------------------------- Step 2 ---------------------------------
+    ---------------------------------- Step 2 ----------------------------------
     ------------------------------------------------------------------------- */
 
 
@@ -280,7 +290,7 @@ int main() {
 
 
     /* -------------------------------------------------------------------------
-    ----------------------------------- Step 3 ---------------------------------
+    ---------------------------------- Step 3 ----------------------------------
     ------------------------------------------------------------------------- */
 
 
@@ -293,24 +303,19 @@ int main() {
 
 
     /* -------------------------------------------------------------------------
-    ------------------------------ Scalar Transport ----------------------------
+    ----------------------------- Scalar Transport -----------------------------
     ------------------------------------------------------------------------- */
 
 
 
     /* -------------------------------------------------------------------------
-    --------------------------- Freeing Variables ------------------------------
+    ---------------------------- Freeing Variables -----------------------------
     ------------------------------------------------------------------------- */
     for (i = 0; i < Ny; i++) {
         free(u[i]);
         free(v[i]);
         free(u_star[i]);
         free(v_star[i]);
-
-        free(du_s[i]);
-        free(dv_s[i]);
-        free(du_ss[i]);
-        free(dv_ss[i]);
 
         free(Hx_old[i]);
         free(Hy_old[i]);
@@ -327,11 +332,6 @@ int main() {
     free(u_star);
     free(v_star);
 
-    free(du_s);
-    free(dv_s);
-    free(du_ss);
-    free(dv_s);
-
     free(Hx_old);
     free(Hy_old);
 
@@ -340,5 +340,14 @@ int main() {
 
     free(step1_mat_x);
     free(step1_mat_y);
+
+
+    free(du_s);
+    free(dv_s);
+    free(du_ss);
+    free(dv_s);
+
+    free(step1_mat_x_vec);
+    free(step1_mat_y_vec);
 
 }
