@@ -112,6 +112,8 @@ int main() {
     double dx = H / 20;
     double dy = H / 20;
 
+    char convective_method[] = "quick";  // options are "upwind", "centraldiff", or "quick"
+
     printf("\n \n");
 
 
@@ -130,6 +132,11 @@ int main() {
     double v_s_ip1;
     double v_s_jp1;
 
+
+    /* For scalar transport */
+    double convec;
+    double diffu;
+
     
 
 
@@ -145,6 +152,7 @@ int main() {
 
     double** p = (double**)calloc(ny, sizeof(double*));             //cell centered
     double** phi = (double**)calloc(ny, sizeof(double*));
+    double** phi_new = (double**)calloc(ny, sizeof(double*));
 
     double** step1_mat_x = (double**)calloc(ny, sizeof(double*));
     double** step1_mat_y = (double**)calloc(ny, sizeof(double*));
@@ -177,6 +185,7 @@ int main() {
 
         p[i] = (double*)calloc(nx, sizeof(double));
         phi[i] = (double*)calloc(nx, sizeof(double));
+        phi_new[i] = (double*)calloc(nx, sizeof(double));
 
         du_s[i] = (double*)calloc(nx, sizeof(double));
         dv_s[i] = (double*)calloc(nx, sizeof(double));
@@ -1018,6 +1027,465 @@ int main() {
     ------------------------------------------------------------------------- */
 
 
+    if ( strcmp(convective_method, "upwind") == 0 ) {
+        printf("Now commencing the upwind method to deal with the scalar transport \n");
+
+        //interior points 
+
+        for (j = 1; j < Ny - 1; j++) {
+            for (i = 1; i < Nx - 1; i++) {
+
+                diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+
+                if (j > Ny / 2) {
+                    convec =  ( u[j][i+1] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (v[j + 1][i] * phi[j][i] - v[j][i] * phi[j - 1][i]) / dy;
+                }
+                else {
+                    convec =  ( u[j][i+1] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (v[j + 1][i] * phi[j+1][i] - v[j][i] * phi[j][i]) / dy;
+                }
+
+
+                phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+            }
+        }
+
+        
+        //top boundary points except corners
+        j = Ny - 1;
+
+        for (i = 1; i < Nx - 1; i++) {
+
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   ( - phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+
+            convec =  ( u[j][i+1] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (0 * phi[j][i] - v[j][i] * phi[j - 1][i]) / dy;
+
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        }
+
+
+        //right boundary points except corners
+        i = Nx - 1;
+
+        for (j = 1; j < Ny - 1; j++) {
+
+            diffu = Diff * (   (phi[j][i] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+
+            convec =  ( u[j][i] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (v[j + 1][i] * phi[j][i] - v[j][i] * phi[j - 1][i]) / dy;
+
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        }
+
+
+        //left boundary points
+        i = 0;
+
+        for (j = 0; j < Ny; j++) {
+            phi_new[j][i] = exp( -1 * pow(j * dy - 2.5 * H + 0.5 * dy ,2) );
+        }
+
+
+        //bottom boundary points
+        j = 0;
+
+        for (i = 1; i < Nx - 1; i++) {
+
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
+
+            convec =  ( u[j][i+1] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (v[j + 1][i] * phi[j][i] - v[j][i] * 0) / dy;
+
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        }
+ 
+
+        //top right corner
+
+        j = Ny - 1; 
+        i = Nx - 1;
+
+        diffu = Diff * (   (- phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (- phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+        convec =  ( u[j][i] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (0 * phi[j][i] - v[j][i] * phi[j - 1][i]) / dy;
+        phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+
+        //bottom right corner
+
+        j = 0; 
+        i = Nx - 1;
+
+        diffu = Diff * (   ( - phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
+        convec =  ( u[j][i] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (v[j + 1][i] * phi[j][i] - v[j][i] * 0) / dy;
+        phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        
+
+
+        //boundary of square
+
+        //bottom 
+        j = 39;
+        for (i = 100; i < 120; i++) {
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   ( - phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+            convec =  ( u[j][i+1] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (0 * phi[j][i] - v[j][i] * phi[j - 1][i]) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        //top
+        j = 60;
+        for (i = 100; i < 120; i++) {
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
+            convec =  ( u[j][i+1] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (v[j + 1][i] * phi[j][i] - v[j][i] * 0) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        
+
+        //left
+        i = 99; 
+        for (j = 40; j < 60; j++) {
+            diffu = Diff * (   ( - phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+            convec =  ( 0 * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (v[j + 1][i] * phi[j][i] - v[j][i] * phi[j - 1][i]) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        
+
+        //right
+        i = 120;
+        for (j = 40; j < 60; j++) {
+            diffu = Diff * (   (phi[j][i+1] - phi[j][i] ) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+            convec =  ( u[j][i+1] * phi[j][i] - u[j][i] * phi[j][i-1]) / dx   +   (v[j + 1][i] * phi[j][i] - v[j][i] * 0) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        
+        //inside square, set phi_new = 0
+
+        for (j = 40; j < 60; j++) {
+            for (i = 100; i < 120; i++) {
+                phi_new[j][i] = 0;
+            }
+        }
+
+
+    }
+
+
+
+
+
+    if ( strcmp(convective_method, "centraldiff") == 0 ) {
+        printf("Now commencing the centraldiff method to deal with the scalar transport \n");
+
+        //interior points 
+
+        for (j = 1; j < Ny - 1; j++) {
+            for (i = 1; i < Nx - 1; i++) {
+
+                diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+
+                convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+
+                phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+            }
+        }
+
+        
+        //top boundary points except corners
+        j = Ny - 1;
+
+        for (i = 1; i < Nx - 1; i++) {
+
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   ( - phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (0 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        }
+
+
+        //right boundary points except corners
+        i = Nx - 1;
+
+        for (j = 1; j < Ny - 1; j++) {
+
+            diffu = Diff * (   (phi[j][i] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+
+            convec =  ( u[j][i] * (phi[j][i] + phi[j][i]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        }
+
+
+        //left boundary points
+        i = 0;
+
+        for (j = 0; j < Ny; j++) {
+            phi_new[j][i] = exp( -1 * pow(j * dy - 2.5 * H + 0.5 * dy ,2) );
+        }
+
+
+        //bottom boundary points
+        j = 0;
+
+        for (i = 1; i < Nx - 1; i++) {
+
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
+
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - 0 ) / dy;
+
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        }
+ 
+
+        //top right corner
+
+        j = Ny - 1; 
+        i = Nx - 1;
+
+        diffu = Diff * (   (- phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (- phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+        convec =  ( u[j][i] * (phi[j][i] + phi[j][i]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (  0  - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+        phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+
+        //bottom right corner
+
+        j = 0; 
+        i = Nx - 1;
+
+        diffu = Diff * (   ( - phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
+        convec =  ( u[j][i] * (phi[j][i] + phi[j][i]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - 0 ) / dy;
+        phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        
+
+
+        //boundary of square
+
+        //bottom 
+        j = 39;
+        for (i = 100; i < 120; i++) {
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   ( - phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (0 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        //top
+        j = 60;
+        for (i = 100; i < 120; i++) {
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - 0 ) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+        
+
+        //left
+        i = 99; 
+        for (j = 40; j < 60; j++) {
+            diffu = Diff * (   ( - phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+            convec =  (   0  - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        
+
+        //right
+        i = 120;
+        for (j = 40; j < 60; j++) {
+            diffu = Diff * (   (phi[j][i+1] - phi[j][i] ) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - 0 ) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        
+        //inside square, set phi_new = 0
+
+        for (j = 40; j < 60; j++) {
+            for (i = 100; i < 120; i++) {
+                phi_new[j][i] = 0;
+            }
+        }
+
+
+    }
+
+
+
+
+
+    if ( strcmp(convective_method, "quick") == 0 ) {
+        printf("Now commencing the quick method to deal with the scalar transport \n");
+
+        //interior points 
+
+        for (j = 1; j < Ny - 1; j++) {
+            for (i = 1; i < Nx - 1; i++) {
+
+                diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+
+                if (j > Ny / 2) {
+                    convec =  ( u[j][i+1] * (- phi[j][i-1]/6 + phi[j][i] * 5 /6 + phi[j][i+1]*2/6) - u[j][i] * (- phi[j][i-2]/6 + phi[j][i-1] * 5 /6 + phi[j][i]*2/6)  ) / dx   +   (v[j + 1][i] * ( phi[j+1][i]*2/6 + phi[j][i]*5/6 - phi[j-1][i]/6 ) - v[j][i] *  (phi[j][i]*2/6 + phi[j-1][i]*5/6 - phi[j-2][i]/6)  ) / dy;
+                }
+                else {
+                    convec =  ( u[j][i+1] * (- phi[j][i-1]/6 + phi[j][i] * 5 /6 + phi[j][i+1]*2/6) - u[j][i] * (- phi[j][i-2]/6 + phi[j][i-1] * 5 /6 + phi[j][i]*2/6)  ) / dx   +   (v[j + 1][i] * (-phi[j+2][i]/6 + phi[j+1][i]*5/6 + phi[j][i]*2/6) - v[j][i] * (-phi[j+1][i]/6 + phi[j][i]*5/6 + phi[j-1][i]*2/6)  ) / dy;
+                }
+
+
+                phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+            }
+        }
+
+
+        //////////////////just replaced with second order central differencing for code below
+
+        
+        //top boundary points except corners
+        j = Ny - 1;
+
+        for (i = 1; i < Nx - 1; i++) {
+
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   ( - phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (0 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        }
+
+
+        //right boundary points except corners
+        i = Nx - 1;
+
+        for (j = 1; j < Ny - 1; j++) {
+
+            diffu = Diff * (   (phi[j][i] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+
+            convec =  ( u[j][i] * (phi[j][i] + phi[j][i]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        }
+
+
+        //left boundary points
+        i = 0;
+
+        for (j = 0; j < Ny; j++) {
+            phi_new[j][i] = exp( -1 * pow(j * dy - 2.5 * H + 0.5 * dy ,2) );
+        }
+
+
+        //bottom boundary points
+        j = 0;
+
+        for (i = 1; i < Nx - 1; i++) {
+
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
+
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - 0 ) / dy;
+
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        }
+ 
+
+        //top right corner
+
+        j = Ny - 1; 
+        i = Nx - 1;
+
+        diffu = Diff * (   (- phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (- phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+        convec =  ( u[j][i] * (phi[j][i] + phi[j][i]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (  0  - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+        phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+
+        //bottom right corner
+
+        j = 0; 
+        i = Nx - 1;
+
+        diffu = Diff * (   ( - phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
+        convec =  ( u[j][i] * (phi[j][i] + phi[j][i]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - 0 ) / dy;
+        phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+
+        
+
+
+        //boundary of square
+
+        //bottom 
+        j = 39;
+        for (i = 100; i < 120; i++) {
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   ( - phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (0 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        //top
+        j = 60;
+        for (i = 100; i < 120; i++) {
+            diffu = Diff * (   (phi[j][i+1] - 2*phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - 0 ) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+        
+
+        //left
+        i = 99; 
+        for (j = 40; j < 60; j++) {
+            diffu = Diff * (   ( - phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+            convec =  (   0  - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        
+
+        //right
+        i = 120;
+        for (j = 40; j < 60; j++) {
+            diffu = Diff * (   (phi[j][i+1] - phi[j][i] ) / (pow(dx,2))   +   (phi[j + 1][i] - 2*phi[j][i] + phi[j-1][i])/(pow(dy,2))    );
+            convec =  ( u[j][i+1] * (phi[j][i] + phi[j][i+1]) / 2 - 0 ) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - v[j][i] * (phi[j - 1][i] + phi[j][i])/2 ) / dy;
+            phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+        }
+
+        
+        //inside square, set phi_new = 0
+
+        for (j = 40; j < 60; j++) {
+            for (i = 100; i < 120; i++) {
+                phi_new[j][i] = 0;
+            }
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+    
+
+
+    for (j = 0; j < Ny; j++) {
+        for (i = 0; i < Nx; i++) {
+            phi[j][i] = phi_new[j][i];
+        }
+    }
+
+
+
 
     /* -------------------------------------------------------------------------
     ---------------------------- Freeing Variables -----------------------------
@@ -1036,6 +1504,7 @@ int main() {
 
         free(p[i]);
         free(phi[i]);
+        free(phi_new[i]);
 
         free(step1_mat_x[i]);
         free(step1_mat_y[i]);
@@ -1055,6 +1524,7 @@ int main() {
 
     free(p);
     free(phi);
+    free(phi_new);
 
     free(du_s);
     free(dv_s);
@@ -1086,7 +1556,7 @@ int main() {
     free(u_star);
     free(v_star);
 
-    printf("Wow the code finished working with no stopping errors, congrats!");
+    printf("\n Wow the code finished working with no stopping errors, congrats!");
     
 
 }
