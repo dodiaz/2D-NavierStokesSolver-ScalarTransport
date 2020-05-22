@@ -32,12 +32,13 @@ double* TriDiag_GaussElim(int size, double dx_or_dy, double dt, double Re, doubl
 
     //if we have the outlet boundary in our domain
     if (right_outlet == 1)  {
-        b[size - 2] = 1;
+        b[size - 2] = 1 + dt / (2 * Re * pow(dx_or_dy,2));
     }
 
-    //if we are solving for du_s
+    //if we are solving for du_s 
     if (solving_for_du_s == 1) {
         b[0] = 1 + 3 * dt / (2 * Re * pow(dx_or_dy, 2));
+        b[size - 2] = 1 + 3 * dt / (2 * Re * pow(dx_or_dy, 2));
     }
 
 
@@ -67,13 +68,6 @@ double* TriDiag_GaussElim(int size, double dx_or_dy, double dt, double Re, doubl
     return d;
 
 }
-
-
-
-
-
-
-
 
 
 
