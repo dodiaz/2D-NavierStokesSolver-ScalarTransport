@@ -112,7 +112,7 @@ int main() {
 
 
 
-    /* Initializing variables for this step 1 */
+    /* Initializing variables for step 1 */
     double Hx;
     double Hy;
     double u_cc; /* cc = Cell cented velocity */
@@ -158,6 +158,8 @@ int main() {
     double** dv_ss = (double**)calloc(ny, sizeof(double*));
 
 
+    // check the size of these to make sure they align with the code
+
     double* temp_vec_x_small = (double*)calloc(99, sizeof(double));
     double* temp_vec_x_medium = (double*)calloc(19 * 20 - 1, sizeof(double));
     double* temp_vec_x_medium2 = (double*)calloc(19 * 20, sizeof(double));
@@ -193,7 +195,6 @@ int main() {
     }
 
 
-
     //these variables must be a little larger for the multigrid to work
     double** u_star = (double**)calloc(ny, sizeof(double*));
     double** v_star = (double**)calloc(ny + 1, sizeof(double*));
@@ -207,15 +208,10 @@ int main() {
     }
 
     
-
-    
-    //sample for loop
-    for(i = 0; i < Nx; i++) {
-        for (j = 0; j < Ny; j++) {
-            u[j][i] = 0;
-            
-        }
-        
+    //Initialize velocity at the left boundary
+    for (j = 0; j < Ny; j++) {
+        u[j][0] = U_inlet;
+        u_star[j][0] = U_inlet;    
     }
 
 
@@ -246,7 +242,7 @@ int main() {
             
                 Hx_old[j][i] = Hx;
             }
-            else if (i == 0 && j != 0 && j != Ny - 1) {      /* At the left wall  */ //////checked
+            else if (i == 0 && j != 0 && j != Ny - 1) {      /* At the left wall  */ 
                 u_cc = (u[j][i] + u[j][i + 1]) / 2;
                 u_cc_im1 = U_inlet;     ///technically don't use this value below
 
@@ -261,7 +257,7 @@ int main() {
             
                 Hx_old[j][i] = Hx;
             }
-            else if (i == Nx - 1 && j != 0 && j != Ny - 1) {     /* At the right wall  */  //////checked
+            else if (i == Nx - 1 && j != 0 && j != Ny - 1) {     /* At the right wall  */  
                 u_cc = u[j][i];
                 u_cc_im1 = (u[j][i - 1] + u[j][i]) / 2;
 
@@ -276,7 +272,7 @@ int main() {
             
                 Hx_old[j][i] = Hx;
             }
-            else if (j == 0&& i != 0 && i != Nx - 1) {      /* At the bottom wall  */   ///////checked 
+            else if (j == 0 && i != 0 && i != Nx - 1) {      /* At the bottom wall  */   
                 u_cc = (u[j][i] + u[j][i + 1]) / 2;
                 u_cc_im1 = (u[j][i - 1] + u[j][i]) / 2;
 
@@ -291,7 +287,7 @@ int main() {
             
                 Hx_old[j][i] = Hx;
             }
-            else if (j == Ny - 1 && i != 0 && i != Nx - 1) {    /* At the top wall  */    ///////checked
+            else if (j == Ny - 1 && i != 0 && i != Nx - 1) {    /* At the top wall  */    
                 u_cc = (u[j][i] + u[j][i + 1]) / 2;
                 u_cc_im1 = (u[j][i - 1] + u[j][i]) / 2;
 
@@ -328,7 +324,7 @@ int main() {
             
                 Hy_old[j][i] = Hy;
             }
-            else if (j == 0 && i != 0 && i != Nx - 1) {    /* At the bottom wall  */    /////corrected
+            else if (j == 0 && i != 0 && i != Nx - 1) {    /* At the bottom wall  */   
                 v_cc = (v[j][i] + v[j + 1][i]) / 2;
                 v_cc_jm1 = 0;
 
@@ -343,7 +339,7 @@ int main() {
             
                 Hy_old[j][i] = Hy;
             }
-            else if (j == Ny - 1 && i != 0 && i != Nx - 1) {     /* At the top wall  */    ///////corrected
+            else if (j == Ny - 1 && i != 0 && i != Nx - 1) {     /* At the top wall  */   
                 v_cc = (v[j][i] + 0) / 2;
                 v_cc_jm1 = (v[j - 1][i] + v[j][i]) / 2;
 
@@ -358,7 +354,7 @@ int main() {
             
                 Hy_old[j][i] = Hy;
             }
-            else if (i == 0 && j != 0 && j != Ny - 1) {      /* At left wall  */  ///////corrected
+            else if (i == 0 && j != 0 && j != Ny - 1) {      /* At left wall  */  
                 v_cc = (v[j][i] + v[j + 1][i]) / 2;
                 v_cc_jm1 = (v[j - 1][i] + v[j][i]) / 2;
 
@@ -373,7 +369,7 @@ int main() {
             
                 Hy_old[j][i] = Hy;
             }
-            else if (i == Nx - 1 && j != 0 && j != Ny - 1) {     /* At the right wall  */    /////corrected
+            else if (i == Nx - 1 && j != 0 && j != Ny - 1) {     /* At the right wall  */    
                 v_cc = (v[j][i] + v[j + 1][i]) / 2;
                 v_cc_jm1 = (v[j - 1][i] + v[j][i]) / 2;
 
@@ -434,6 +430,8 @@ int main() {
 
     Hy_old[j][i] = Hy;
 
+
+
     /////////////////top right corner/////////////////
     i = Nx - 1;
     j = Ny - 1;
@@ -452,7 +450,6 @@ int main() {
     step1_mat_x[j][i] = dt * (Hx * 3 / 2 - Hx_old[j][i] / 2 + (1 / Re) * (       (u[j][i] - 2 * u[j][i] + u[j][i - 1]) / pow(dx, 2)   +     ( (u_s_jp1 - u[j][i]) *(2/dy) - (u[j][i] - u[j-1][i]) / dy) / dy      ));
 
     Hx_old[j][i] = Hx;
-            
 
 
     //y data
@@ -543,10 +540,6 @@ int main() {
 
     Hy_old[j][i] = Hy;
 
-
-
-
-    
 
     
     //--//--//--//--//-- Deal with boundary conditions for square obstacle --\\--\\--\\--\\--\\ 
@@ -668,15 +661,21 @@ int main() {
 
         Hy = ((pow(v_cc, 2) - pow(v_cc_jm1, 2)) / dy) + (u_s_ip1 * v_s_ip1 - u_s * v_s) / dx;
 
-        step1_mat_y[j][i] = dt * (Hy * 3 / 2 - Hy_old[j][i] / 2 + (1 / Re) * (     (v[j][i + 1] - 2 * v[j][i] + v[j][i - 1]) / pow(dx, 2)        + (v[j + 1][i] - 2 * v[j][i] + v[j - 1][i]) / pow(dy, 2)));
+        step1_mat_y[j][i] = dt * (Hy * 3 / 2 - Hy_old[j][i] / 2 + (1 / Re) * (   ( (v_s_ip1 - v[j][j])*2/dy - (v[j][i] - v[j][i-1]/dy) )/dy            + (v[j + 1][i] - 2 * v[j][i] + v[j - 1][i]) / pow(dy, 2)));
     
         Hy_old[j][i] = Hy;
     }
 
 
 
+    //////////// set values inside the square equal to zero for good measure
 
-    
+    for (j = 40; j < 60; j++) {
+        for (i = 100; i < 120; i++) {
+            step1_mat_x[j][i] = 0;
+            step1_mat_y[j][i] = 0;
+        }
+    }
     
 
 
@@ -734,7 +733,7 @@ int main() {
 
     }
 
-    
+   
 
     //rows above the top of the square
     for (j = 60; j < Ny; j++) {
@@ -826,8 +825,6 @@ int main() {
 
 
 
-
-
     
     //--//--//--//--//-- Tridiagonal solve for du_s --\\--\\--\\--\\--\\ 
 
@@ -895,10 +892,6 @@ int main() {
         }
 
     }
-
-
-    
-
 
 
 
@@ -1011,7 +1004,7 @@ int main() {
 
 
 
-
+    
 
 
 
