@@ -1261,7 +1261,7 @@ int main() {
     int iter = 0;
 
     double Re = 20;  /* Problem parameters */
-    double dt = 0.0001;
+    double dt = 0.01;
     double H = 1;
     double U_inlet = 1;
     double Diff = pow(10,-4);
@@ -1270,7 +1270,7 @@ int main() {
     char convective_method[] = "centraldiff";  // options are "upwind", "centraldiff", or "quick"
 
     double epsilon = pow(10, -3);
-    int max_time_steps = 60000;
+    int max_time_steps = 20000;
 
     int Nx = 500;
     int Ny = 100;
