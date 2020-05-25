@@ -1206,7 +1206,7 @@ int main() {
     double U_inlet = 1;
     double Diff = pow(10,-4);
     double nGS = 15000; /* Number of Gauss-Seidel steps to take per relaxation in mutligrid acceleration */
-
+    
     char convective_method[] = "quick";  // options are "upwind", "centraldiff", or "quick"
 
     double epsilon = pow(10, -3);
@@ -1222,8 +1222,8 @@ int main() {
 
     int Bj = 40;
     int Bi = 200;
-    
-    printf("\n \n");
+
+
 
     /* Initializing variables for this step 1 */
     double Hx;
@@ -1268,7 +1268,7 @@ int main() {
     double** du_ss = (double**)calloc(ny, sizeof(double*));
     double** dv_ss = (double**)calloc(ny, sizeof(double*));
 
-
+    // check the size of these to make sure they align with the code
 
     double* temp_vec_x_small = (double*)calloc(99, sizeof(double));
     double* temp_vec_x_medium = (double*)calloc(19 * 20 - 1, sizeof(double));
@@ -1321,9 +1321,9 @@ int main() {
         u[j][0] = U_inlet;
         u_star[j][0] = U_inlet;    
     }
+ 
 
-
-
+    
     /* -------------------------------------------------------------------------
     ----------------------------------- Step 1 ---------------------------------
     ------------------------------------------------------------------------- */
@@ -1349,7 +1349,7 @@ int main() {
             
                 Hx_old[j][i] = Hx;
             }
-            else if (i == 0 && j != 0 && j != Ny - 1) {      /* At the left wall  */ //////checked
+            else if (i == 0 && j != 0 && j != Ny - 1) {      /* At the left wall  */ 
                 u_cc = (u[j][i] + u[j][i + 1]) / 2;
                 u_cc_im1 = U_inlet;     ///technically don't use this value below
 
@@ -1364,7 +1364,7 @@ int main() {
             
                 Hx_old[j][i] = Hx;
             }
-            else if (i == Nx - 1 && j != 0 && j != Ny - 1) {     /* At the right wall  */  //////checked
+            else if (i == Nx - 1 && j != 0 && j != Ny - 1) {     /* At the right wall  */  
                 u_cc = u[j][i];
                 u_cc_im1 = (u[j][i - 1] + u[j][i]) / 2;
 
@@ -1379,7 +1379,7 @@ int main() {
             
                 Hx_old[j][i] = Hx;
             }
-            else if (j == 0&& i != 0 && i != Nx - 1) {      /* At the bottom wall  */   ///////checked 
+            else if (j == 0 && i != 0 && i != Nx - 1) {      /* At the bottom wall  */   
                 u_cc = (u[j][i] + u[j][i + 1]) / 2;
                 u_cc_im1 = (u[j][i - 1] + u[j][i]) / 2;
 
@@ -1394,7 +1394,7 @@ int main() {
             
                 Hx_old[j][i] = Hx;
             }
-            else if (j == Ny - 1 && i != 0 && i != Nx - 1) {    /* At the top wall  */    ///////checked
+            else if (j == Ny - 1 && i != 0 && i != Nx - 1) {    /* At the top wall  */    
                 u_cc = (u[j][i] + u[j][i + 1]) / 2;
                 u_cc_im1 = (u[j][i - 1] + u[j][i]) / 2;
 
@@ -1431,7 +1431,7 @@ int main() {
             
                 Hy_old[j][i] = Hy;
             }
-            else if (j == 0 && i != 0 && i != Nx - 1) {    /* At the bottom wall  */    /////corrected
+            else if (j == 0 && i != 0 && i != Nx - 1) {    /* At the bottom wall  */   
                 v_cc = (v[j][i] + v[j + 1][i]) / 2;
                 v_cc_jm1 = 0;
 
@@ -1446,7 +1446,7 @@ int main() {
             
                 Hy_old[j][i] = Hy;
             }
-            else if (j == Ny - 1 && i != 0 && i != Nx - 1) {     /* At the top wall  */    ///////corrected
+            else if (j == Ny - 1 && i != 0 && i != Nx - 1) {     /* At the top wall  */   
                 v_cc = (v[j][i] + 0) / 2;
                 v_cc_jm1 = (v[j - 1][i] + v[j][i]) / 2;
 
@@ -1461,7 +1461,7 @@ int main() {
             
                 Hy_old[j][i] = Hy;
             }
-            else if (i == 0 && j != 0 && j != Ny - 1) {      /* At left wall  */  ///////corrected
+            else if (i == 0 && j != 0 && j != Ny - 1) {      /* At left wall  */  
                 v_cc = (v[j][i] + v[j + 1][i]) / 2;
                 v_cc_jm1 = (v[j - 1][i] + v[j][i]) / 2;
 
@@ -1476,7 +1476,7 @@ int main() {
             
                 Hy_old[j][i] = Hy;
             }
-            else if (i == Nx - 1 && j != 0 && j != Ny - 1) {     /* At the right wall  */    /////corrected
+            else if (i == Nx - 1 && j != 0 && j != Ny - 1) {     /* At the right wall  */    
                 v_cc = (v[j][i] + v[j + 1][i]) / 2;
                 v_cc_jm1 = (v[j - 1][i] + v[j][i]) / 2;
 
@@ -1553,7 +1553,7 @@ int main() {
     step1_mat_x[j][i] = dt * (Hx * 3 / 2 - Hx_old[j][i] / 2 + (1 / Re) * (       (u[j][i] - 2 * u[j][i] + u[j][i - 1]) / pow(dx, 2)   +     ( (u_s_jp1 - u[j][i]) *(2/dy) - (u[j][i] - u[j-1][i]) / dy) / dy      ));
 
     Hx_old[j][i] = Hx;
-            
+
 
     //y data
     v_cc = (v[j][i] + 0) / 2;
@@ -1642,7 +1642,7 @@ int main() {
     step1_mat_y[j][i] = dt * (Hy * 3 / 2 - Hy_old[j][i] / 2 + (1 / Re) * (    (v[j][i] - 2 * v[j][i] + v[j][i - 1]) / pow(dx, 2) + ( (v[j+1][i] - v[j][i])/dy - (v_cc - v[j][i])*2/dy ) /dy        ));
 
     Hy_old[j][i] = Hy;
-    
+
 
     
     //--//--//--//--//-- Deal with boundary conditions for square obstacle --\\--\\--\\--\\--\\ 
@@ -1763,7 +1763,7 @@ int main() {
 
         Hy = ((pow(v_cc, 2) - pow(v_cc_jm1, 2)) / dy) + (u_s_ip1 * v_s_ip1 - u_s * v_s) / dx;
 
-        step1_mat_y[j][i] = dt * (Hy * 3 / 2 - Hy_old[j][i] / 2 + (1 / Re) * (     (v[j][i + 1] - 2 * v[j][i] + v[j][i - 1]) / pow(dx, 2)        + (v[j + 1][i] - 2 * v[j][i] + v[j - 1][i]) / pow(dy, 2)));
+        step1_mat_y[j][i] = dt * (Hy * 3 / 2 - Hy_old[j][i] / 2 + (1 / Re) * (   ( (v_s_ip1 - v[j][j])*2/dy - (v[j][i] - v[j][i-1]/dy) )/dy            + (v[j + 1][i] - 2 * v[j][i] + v[j - 1][i]) / pow(dy, 2)));
     
         Hy_old[j][i] = Hy;
     }
@@ -1778,9 +1778,9 @@ int main() {
         }
     }
     
+
+
     
-
-
     //--//--//--//--//-- Tridiagonal solve for du_ss --\\--\\--\\--\\--\\ 
 
     //rows below the bottom of the square
@@ -1833,7 +1833,7 @@ int main() {
 
     }
 
-    
+   
 
     //rows above the top of the square
     for (j = 60; j < Ny; j++) {
@@ -1990,7 +1990,7 @@ int main() {
 
     }
 
-    
+
 
     //--//--//--//--//-- Tridiagonal solve for dv_s --\\--\\--\\--\\--\\ 
 
@@ -2058,10 +2058,10 @@ int main() {
     }
 
     
-    
-    
-    //--//--//--//--//-- Update u_star and v_star --\\--\\--\\--\\--\\ 
 
+
+    //--//--//--//--//-- Update u_star and v_star --\\--\\--\\--\\--\\ 
+    
     for (j = 0; j < Ny; j++) {
         for (i = 0; i < Nx; i++) {
             u_star[j][i] = u[j][i] + du_s[j][i];
@@ -2165,7 +2165,7 @@ int main() {
     /* -------------------------------------------------------------------------
     ----------------------------- Scalar Transport -----------------------------
     ------------------------------------------------------------------------- */
-
+    
 
     if ( strcmp(convective_method, "upwind") == 0 ) {
         printf("Now commencing the upwind method to deal with the scalar transport \n");
@@ -2631,7 +2631,7 @@ int main() {
     ---------------------------- Freeing Variables -----------------------------
     ------------------------------------------------------------------------- */
     
-    
+
     for (i = 0; i < Ny; i++) {
         free(u[i]);
         free(v[i]);
@@ -2653,7 +2653,7 @@ int main() {
         free(dv_ss[i]);
 
     }
-    
+
     free(u);
     free(v);
 
@@ -2665,14 +2665,14 @@ int main() {
     free(phi);
     free(phi_new);
 
+    free(step1_mat_x);
+    free(step1_mat_y);
+
 
     free(du_s);
     free(dv_s);
     free(du_ss);
     free(dv_ss);
-
-    free(step1_mat_x);
-    free(step1_mat_y);
 
     free(temp_vec_x_small);
     free(temp_vec_x_medium);
@@ -2695,8 +2695,9 @@ int main() {
     free(u_star);
     free(v_star);
 
-    printf("\n End of script, congrats!");
-    
+    printf("\n End of script");
+
     return 0;
+    
 
 }
