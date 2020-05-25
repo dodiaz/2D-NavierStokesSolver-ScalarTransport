@@ -6,6 +6,66 @@
 #include <string.h>
 
 
+//function used to print the data to a text file
+int print_current_data(int step, double** u, double** v, double** phi, int NX, int NY, char method[]) {
+    int i, j;
+
+
+    char filename1[40] = "step_";
+    itoa(step, filename1 + 4, 10);
+    strcat(filename1, "_");
+    strcat(filename1, method);
+    strcat(filename1, "_u_data.txt");
+
+    FILE* fpointer1 = fopen(filename1, "w");
+    for (j = 0; j < NY; j++) {
+        for (i = 0; i < NX; i++) {
+            fprintf(fpointer1, "%.20lf ", u[j][i]);
+        }
+        fprintf(fpointer1, "\n");
+    }
+    fclose(fpointer1);
+
+
+
+    char filename2[25] = "step_";
+    itoa(step, filename2 + 4, 10);
+    strcat(filename2, "_");
+    strcat(filename2, method);
+    strcat(filename2, "_v_data.txt");
+
+    FILE* fpointer2 = fopen(filename2, "w");
+    for (j = 0; j < NY; j++) {
+        for (i = 0; i < NX; i++) {
+            fprintf(fpointer2, "%.20lf ", v[j][i]);
+        }
+        fprintf(fpointer2, "\n");
+    }
+    fclose(fpointer2);
+
+
+
+    char filename3[30] = "step_";
+    itoa(step, filename3 + 4, 10);
+    strcat(filename3, "_");
+    strcat(filename3, method);
+    strcat(filename3, "_phi_data.txt");
+
+    FILE* fpointer3 = fopen(filename3, "w");
+    for (j = 0; j < NY; j++) {
+        for (i = 0; i < NX; i++) {
+            fprintf(fpointer3, "%.20lf ", phi[j][i]);
+        }
+        fprintf(fpointer3, "\n");
+    }
+    fclose(fpointer3);
+
+
+
+    return 1;
+}
+
+
 double* TriDiag_GaussElim(int size, double dx_or_dy, double dt, double Re, double* d, int right_outlet, int solving_for_du_s) {
 
     ////input size should be Nx
@@ -1210,7 +1270,7 @@ int main() {
     char convective_method[] = "centraldiff";  // options are "upwind", "centraldiff", or "quick"
 
     double epsilon = pow(10, -3);
-    int max_time_steps = 100;
+    int max_time_steps = 60000;
 
     int Nx = 500;
     int Ny = 100;
@@ -1242,6 +1302,8 @@ int main() {
     /* For scalar transport */
     double convec;
     double diffu;
+
+    int print_now;
 
 
     /* -------------------------------------------------------------------------
@@ -2168,7 +2230,7 @@ int main() {
 
 
         if ( strcmp(convective_method, "upwind") == 0 ) {
-            printf("Now commencing the upwind method to deal with the scalar transport \n");
+            printf("Step %d of upwind method to deal with the scalar transport \n", iter);
 
             //interior points 
 
@@ -2318,8 +2380,7 @@ int main() {
 
 
         if ( strcmp(convective_method, "centraldiff") == 0 ) {
-            printf("Now commencing the centraldiff method to deal with the scalar transport \n");
-
+            printf("Step %d of contral diff method to deal with the scalar transport \n", iter);
             //interior points 
 
             for (j = 1; j < Ny - 1; j++) {
@@ -2622,6 +2683,10 @@ int main() {
 
 
     }
+
+
+    print_now = print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+    printf("Data was printed for Point Jacobi method");
 
 
     /* -------------------------------------------------------------------------
