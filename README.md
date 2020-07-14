@@ -6,9 +6,7 @@ Objective of the project: create a second-order unsteady Navier-Stokes solver on
 
 The steps of the solver are described in the HW7_MAE6230_2020 pdf's, one which is the original document from my computational fluid dynamics course at Cornell and the other which is the same version with my notes written all over it. 
 
-The equations that are "solved" in this flow solver are the 2D incompressible Navier-Stokes equations:
-
-$$x = y $$
+The equations that are "solved" in this flow solver are the 2D incompressible Navier-Stokes equations and the scalar transport equation (equation 6 in HW7_MAE6230_2020_orig.pdf) with an inital profile on the left hand side of the domain described by equation 7 in HW7_MAE6230_2020_orig.pdf.
 
 
 Some things that can be changed about the problem we are solving without having to significantly change the code: 
