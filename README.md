@@ -1,6 +1,8 @@
 # 2D_NavierStokesSolver_ScalarTransport
 
-Objective of the project: create a second-order unsteady Navier-Stokes solver on a semi-complex geometry including scalar transport. 
+Objective of the project: create a second-order unsteady Navier-Stokes solver on a semi-complex geometry including scalar transport. Pictured below is an image of the geometry
+
+![](geometry.png)
 
 
 Some notes:
