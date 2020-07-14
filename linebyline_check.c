@@ -67,7 +67,7 @@ void print_current_data(int step, double** u, double** v, double** phi, int NX, 
 
 
 
-// function used to compute the tridiagonal gaussian elimination to solve for du_ss, du_s, dv_ss, and dv_ss
+
 double* TriDiag_GaussElim(int size, double dx_or_dy, double dt, double Re, double* d, int right_outlet, int first_last_half, int first_half) {
 
     ////input size should be Nx
@@ -271,9 +271,13 @@ int GS_nstep(double** f, double** phi, int Nx, int Ny, double D_x, double D_y, d
 
 
 
+
+
+
         
         
-        // in order to decrease the running costs, only calculate laplace_phi every 5 iterations
+        
+    
         if (step % 5 == 2) {
 
             
@@ -359,13 +363,13 @@ int GS_nstep(double** f, double** phi, int Nx, int Ny, double D_x, double D_y, d
             }  
 
 
-            // compute the norm 
+            /* compute the norm */
             laplace_phi_minus_f_norm = 0;
 
             for (j = 0; j < Ny; j++) {
                 for (i = 0; i < Nx; i++) {
 
-                    if ( j < Bj ||  j > Bj + void_len - 1 || i < Bi || i > Bi + void_len - 1  ) {     // if not inside the void
+                    if ( j < Bj ||  j > Bj + void_len - 1 || i < Bi || i > Bi + void_len - 1  ) {     /* if not inside the void... */
                         laplace_phi_minus_f_norm += pow((laplace_phi[j][i] - f[j][i]), 2);
                     }
 
@@ -489,7 +493,7 @@ int main() {
 
     // parameters that define the methods we use to solve the NS equations
     char convective_method[] = "quick";  // options are "upwind", "centraldiff", or "quick"
-    int max_time_steps = 60000;
+    int max_time_steps = 100;
     double dt = 0.001;
     double epsilon = pow(10, -3);
     double nGS = 500; // Number of Gauss-Seidel steps to take 
@@ -934,7 +938,10 @@ int main() {
 
                     step1_mat_y[j][i] = 0;
                     
+                    
                 }
+
+
 
                 
 
@@ -1331,6 +1338,7 @@ int main() {
 
 
 
+
         /* -------------------------------------------------------------------------
         ----------------------------------- Step 2 ---------------------------------
         ------------------------------------------------------------------------- */
@@ -1356,9 +1364,13 @@ int main() {
 
 
 
+
+
         /* -------------------------------------------------------------------------
         ----------------------------------- Step 3 ---------------------------------
         ------------------------------------------------------------------------- */
+
+
 
 
         for (j = 0; j < Ny; j++) {
@@ -1429,6 +1441,11 @@ int main() {
 
 
 
+
+
+
+
+        
 
         /* -------------------------------------------------------------------------
         ----------------------------- Scalar Transport -----------------------------
@@ -1684,7 +1701,7 @@ int main() {
                 phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
             }
 
-
+           
             //inside square, set phi_new = 0
 
             for (j = Bj; j < Bj + void_len; j++) {                        
@@ -1701,6 +1718,7 @@ int main() {
                     phi[j][i] = phi_new[j][i];
                 }
             }
+
 
 
         }
@@ -1793,6 +1811,8 @@ int main() {
             diffu = Diff * (   ( - phi[j][i] + phi[j][i-1]) / (pow(dx,2))   +   (phi[j + 1][i] - phi[j][i] )/(pow(dy,2))    );
             convec =  ( u[j][i] * (phi[j][i] + phi[j][i]) / 2 - u[j][i] * (phi[j][i-1] + phi[j][i])/2) / dx   +   (v[j + 1][i] * (phi[j][i] + phi[j + 1][i])/2 - 0 ) / dy;
             phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
+           
+
 
             
 
@@ -1848,6 +1868,7 @@ int main() {
             }
 
 
+
         }
 
 
@@ -1855,11 +1876,13 @@ int main() {
 
 
         if ( strcmp(convective_method, "quick") == 0 ) {
+            printf("Step %d with quick for scalar transport \n", iter);
             
+            /*
             if (iter % 10 == 1) { 
                 printf("Step %d with quick for scalar transport \n", iter);
             }
-            
+            */
 
             //interior points
 
@@ -1957,6 +1980,8 @@ int main() {
             phi_new[j][i] = phi[j][i] + dt * (diffu - convec);
            
 
+
+            
 
             //bottom boundary of void
             j = Bj - 1;
@@ -2087,27 +2112,89 @@ int main() {
 
 
 
+
+
         ///////// print periodocially
 
-        if (iter == max_time_steps / 5) {
+        if (iter == 1000) {
             print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
             printf("Data was printed for Gauss Seidel method at step %d", iter);
         }
 
-        if (iter == max_time_steps * 2 / 5) {
+        if (iter == 2000) {
             print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
             printf("Data was printed for Gauss Seidel method at step %d", iter);
         }
 
-        if (iter == max_time_steps * 3 / 5) {
+        if (iter == 3000) {
             print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
             printf("Data was printed for Gauss Seidel method at step %d", iter);
         }
 
-        if (iter == max_time_steps * 4 / 5) {
+        if (iter == 5000) {
             print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
             printf("Data was printed for Gauss Seidel method at step %d", iter);
         }
+
+        if (iter == 7000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 10000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 15000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 20000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 25000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 30000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 35000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 40000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 45000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 50000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        if (iter == 55000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        
+
+
+        
 
         
 

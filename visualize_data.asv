@@ -4,9 +4,9 @@ close all
 
 
 
-u = load('step10000_quick_u_data.txt');
-v = load('step10000_quick_v_data.txt');
-phi = load('step10000_quick_phi_data.txt');
+u = load('step1000_quick_u_data.txt');
+v = load('step1000_quick_v_data.txt');
+phi = load('step1000_quick_phi_data.txt');
 figure
 quiver(u,v)
 xlim([0, 500])
@@ -20,24 +20,6 @@ sum = 0;
 for i = 1:size(v,1)
     sum = sum + u(i,500);
 end
-
-%% 
-
-laplace_phi = load('step500_GS_lap_data.txt');
-f = load('step500_GS_f_data.txt');
-
-difference = laplace_phi - f;
-
-
-%%
-
-u_star = load('step11_method_u_star_data.txt');
-v_star = load('step11_method_v_star_data.txt');
-
-
-
-
-
 
 %%
 
