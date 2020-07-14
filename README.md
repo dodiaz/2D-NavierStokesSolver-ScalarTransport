@@ -2,7 +2,7 @@
 
 Objective of the project: create a second-order unsteady Navier-Stokes solver on a semi-complex geometry including scalar transport. Pictured below is an image of the geometry
 
-![](geometry.png)
+![](geometry.jpg)
 
 
 Some notes:
