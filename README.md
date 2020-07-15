@@ -19,3 +19,9 @@ Some things that can be changed about the problem we are solving without having 
 Some notes:
 1. A Gauss-Seidel solver is used to solve for the pressure but this is higly inefficient. For a faster running code, one might want to swap this out for a faster pressure solver, i.e. a conjugate gradient solver or a multigrid method. 
 2. Three methods were implemented for solving the the scalar transport equations: first order upwinding, second order central differencing, and third order QUICK. The second order method was blowing up once the vortices reached the right hand side of the domain so there is likely an error. QUICK has the best accuracy and doesn't add much computation time so I would suggest just using QUICK.
+
+# Results
+
+I've made two videos that show the velocity and scalar transport over time in the video called "Video_highres_quick_Re400.avi" for a run that used quick for the scalar transnprot equation and a Reynolds number of 400. Here is a teaser of thie video!
+
+![](images_highres_quick_Re400/data25.png)
