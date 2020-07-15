@@ -487,7 +487,7 @@ int main() {
 
     
 
-    // parameters that define the methods we use to solve the NS equations
+    // parameters that define the methods we use to solve the NS equations and scalar transport equation.
     char convective_method[] = "quick";  // options are "upwind", "centraldiff", or "quick"
     int max_time_steps = 60000;
     double dt = 0.001;
@@ -2089,6 +2089,7 @@ int main() {
 
         ///////// print periodocially
 
+        /*
         if (iter == max_time_steps / 5) {
             print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
             printf("Data was printed for Gauss Seidel method at step %d", iter);
@@ -2105,6 +2106,113 @@ int main() {
         }
 
         if (iter == max_time_steps * 4 / 5) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+
+        */
+
+        if (iter == 1) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 1000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 2500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 5000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 7500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 10000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 12500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 15000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 17500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 20000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 22500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 25000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 27500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 30000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 32500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 35000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 37500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 40000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 42500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 45000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 47500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 50000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 52500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 55000) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 57500) {
+            print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
+            printf("Data was printed for Gauss Seidel method at step %d", iter);
+        }
+        if (iter == 60000) {
             print_current_data(iter, u, v, phi, Nx, Ny, convective_method);
             printf("Data was printed for Gauss Seidel method at step %d", iter);
         }
