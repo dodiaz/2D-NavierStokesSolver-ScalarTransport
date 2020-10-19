@@ -22,6 +22,6 @@ Some notes:
 
 # Results
 
-I've made two videos that show the velocity and scalar transport over time in the video called "Video_highres_quick_Re400.avi" for a run that used quick for the scalar transnprot equation and a Reynolds number of 400. Here is a teaser of thie video!
+I've made two videos that show the velocity and scalar transport over time in the video called "Video_highres_quick_Re400.avi" for a run that used quick for the scalar transnprot equation and a Reynolds number of 400. Here is a teaser of the video!
 
 ![](images_lowres_quick_Re400/data25.png)
